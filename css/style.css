@@ -1,0 +1,84 @@
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; background: #000; }
+
+/* ЭКРАНЫ */
+.screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 5000; }
+.active { display: flex; }
+.os-title { margin-bottom: 50px; font-weight: 300; letter-spacing: 2px; color: white; }
+
+/* ЗАПУСК И ЗАГРУЗКА */
+#launch-screen { background: #111; color: white; }
+#boot-screen, #shutdown-screen { background: black; color: white; }
+.power-btn { padding: 15px 40px; font-size: 24px; border: 2px solid white; background: transparent; color: white; cursor: pointer; border-radius: 50px; transition: 0.3s; }
+.power-btn:hover { background: white; color: black; box-shadow: 0 0 20px white; }
+.loader { border: 4px solid #333; border-top: 4px solid #0078d7; border-radius: 50%; width: 60px; height: 60px; animation: spin 3s linear infinite; margin-bottom: 20px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* ВХОД */
+#login-screen { background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover; z-index: 4000; }
+.login-box { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); padding: 40px; border-radius: 10px; text-align: center; color: white; border: 1px solid rgba(255,255,255,0.1); }
+.login-box input { display: block; margin: 10px auto; padding: 10px; width: 220px; border: none; border-radius: 5px; outline: none; }
+.login-box button { padding: 10px 30px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; background: #0078d7; color: white; font-weight: bold; }
+.error-msg { color: #ff6b6b; font-size: 13px; margin-top: 10px; }
+.toggle-auth { margin-top: 15px; font-size: 12px; cursor: pointer; text-decoration: underline; opacity: 0.8; }
+
+/* РАБОЧИЙ СТОЛ */
+#desktop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; display: none; z-index: 1; transition: background 0.5s; }
+.desktop-icons-container { display: flex; flex-direction: column; flex-wrap: wrap; height: 90%; align-content: flex-start; padding: 10px; }
+.desktop-icon { width: 74px; height: 95px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; cursor: pointer; color: white; text-shadow: 1px 1px 2px black; margin: 5px; }
+.desktop-icon:hover { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 3px; }
+.icon-img { font-size: 36px; margin-bottom: 5px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.7)); }
+.icon-text { font-size: 12px; text-align: center; word-break: break-word; }
+
+/* ПАНЕЛЬ ЗАДАЧ */
+#taskbar { position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; background: rgba(20, 20, 20, 0.95); display: flex; align-items: center; padding: 0; z-index: 3000; border-top: 1px solid #333; }
+.start-btn { width: 48px; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.start-btn:hover { background: #333; }
+.start-icon { font-size: 22px; color: #00d8ff; font-weight: bold; text-shadow: 0 0 5px #00d8ff; }
+.taskbar-items { flex: 1; display: flex; padding-left: 10px; overflow: hidden; }
+.task-item { padding: 0 10px; height: 36px; margin-top: 2px; background: rgba(255,255,255,0.05); color: #ccc; display: flex; align-items: center; margin-right: 5px; border-radius: 2px; cursor: pointer; font-size: 12px; min-width: 100px; max-width: 150px; }
+.task-item.active-task { background: rgba(255,255,255,0.15); border-bottom: 2px solid #00d8ff; color: white; }
+.tray { padding-right: 15px; color: white; font-size: 12px; display: flex; align-items: center; gap: 15px; }
+
+/* МЕНЮ ПУСК */
+#start-menu { position: absolute; bottom: 40px; left: 0; width: 320px; height: 450px; background: #1f1f1f; border-top-right-radius: 5px; border: 1px solid #333; display: none; flex-direction: column; z-index: 2999; box-shadow: 4px -4px 15px rgba(0,0,0,0.5); }
+.start-container { display: flex; height: 100%; }
+.start-sidebar { width: 50px; background: #111; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 10px; }
+.start-main { flex: 1; padding: 10px; overflow-y: auto; }
+.menu-item { display: flex; align-items: center; padding: 10px; color: white; cursor: pointer; border-radius: 4px; font-size: 14px; }
+.menu-item:hover { background: #333; }
+.shutdown-btn { background: none; border: none; color: white; cursor: pointer; font-size: 20px; padding: 10px; }
+.shutdown-btn:hover { color: #ff5f56; }
+
+/* ОКНА */
+.window { position: absolute; width: 500px; height: 350px; background: #f0f0f0; border: 1px solid #0078d7; box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden; resize: both; min-width: 250px; min-height: 150px; }
+.title-bar { background: white; padding: 0 10px; display: flex; justify-content: space-between; align-items: center; height: 32px; border-bottom: 1px solid #ddd; }
+.title-drag-area { flex: 1; height: 100%; display: flex; align-items: center; font-size: 12px; cursor: default; }
+.window-controls { display: flex; height: 100%; }
+.win-btn { width: 40px; height: 100%; border: none; background: transparent; cursor: pointer; }
+.win-btn:hover { background: #e5e5e5; }
+.close-btn:hover { background: #e81123; color: white; }
+.window-content { flex: 1; position: relative; background: white; overflow: hidden; }
+
+/* Компоненты приложений */
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; height: 100%; padding: 4px; background: #eee; }
+.calc-display { grid-column: span 4; background: #fff; padding: 20px 10px; text-align: right; font-size: 28px; margin-bottom: 2px; }
+.calc-btn { border: none; background: white; font-size: 16px; cursor: pointer; }
+.calc-btn:hover { background: #f0f0f0; }
+.calc-btn.equal { background: #0078d7; color: white; }
+
+.notepad-wrapper { display: flex; flex-direction: column; height: 100%; }
+.notepad-menu { padding: 5px; background: #f0f0f0; border-bottom: 1px solid #ccc; display: flex; gap: 10px; }
+textarea.notepad-area { flex: 1; border: none; resize: none; padding: 10px; outline: none; font-family: monospace; font-size: 14px; }
+
+.settings-container { display: flex; height: 100%; }
+.settings-sidebar { width: 150px; background: #f3f3f3; border-right: 1px solid #ddd; padding: 10px 0; }
+.set-tab { padding: 10px 20px; cursor: pointer; font-size: 14px; }
+.set-tab:hover { background: #e6e6e6; }
+.set-tab.active { background: #fff; border-left: 3px solid #0078d7; font-weight: bold; }
+.settings-content { flex: 1; padding: 20px; overflow-y: auto; background: #fff; }
+.set-section { display: none; }
+.set-section.active { display: block; }
+.wallpaper-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.wallpaper-thumb { height: 60px; border-radius: 4px; background-size: cover; cursor: pointer; border: 2px solid transparent; }
+.wallpaper-thumb:hover { transform: scale(1.05); }
+.btn-action { padding: 5px 15px; background: #eee; border: 1px solid #ccc; cursor: pointer; border-radius: 3px; }
