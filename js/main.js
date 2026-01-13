@@ -1,16 +1,17 @@
-import { auth } from './config.js';
+import { auth, db } from './config.js'; // Добавили db
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"; // Функции базы
 import { playSystemSound } from './sound.js';
 import { apps } from './apps.js';
 import { openWindow } from './wm.js';
 
 // --- ИНИЦИАЛИЗАЦИЯ ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Восстановление обоев
-    const savedWp = localStorage.getItem('os_wallpaper');
-    if(savedWp) document.getElementById('desktop').style.backgroundImage = `url('${savedWp}')`;
+    // Исправил ссылку на обои по умолчанию на более надежную
+    const defaultWp = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop';
+    const savedWp = localStorage.getItem('os_wallpaper') || defaultWp;
+    document.getElementById('desktop').style.backgroundImage = `url('${savedWp}')`;
     
-    // Часы
     setInterval(() => {
         const d = new Date();
         document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -43,23 +44,37 @@ const errorMsg = document.getElementById('error-msg');
 toggleAuth.addEventListener('click', () => {
     isRegistering = !isRegistering;
     document.getElementById('auth-title').innerText = isRegistering ? "Регистрация" : "Вход";
-    authBtn.innerText = isRegistering ? "Создать" : "Войти";
-    toggleAuth.innerText = isRegistering ? "Есть аккаунт?" : "Нет аккаунта?";
+    authBtn.innerText = isRegistering ? "Создать аккаунт" : "Войти";
+    toggleAuth.innerText = isRegistering ? "Уже есть аккаунт?" : "Нет аккаунта?";
 });
 
-authBtn.addEventListener('click', () => {
+authBtn.addEventListener('click', async () => {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
     playSystemSound('click');
-    errorMsg.innerText = "Загрузка...";
+    errorMsg.innerText = "Обработка...";
 
-    const method = isRegistering ? createUserWithEmailAndPassword : signInWithEmailAndPassword;
-    method(auth, email, pass)
-        .then(() => loadDesktop())
-        .catch(err => {
-            playSystemSound('error');
-            errorMsg.innerText = err.code;
-        });
+    try {
+        let userCred;
+        if (isRegistering) {
+            // 1. Создаем пользователя
+            userCred = await createUserWithEmailAndPassword(auth, email, pass);
+            // 2. Создаем ему кошелек в базе данных
+            await setDoc(doc(db, "users", userCred.user.uid), {
+                email: email,
+                UAH: 0,      // Реальные гривны (ты начисляешь)
+                money: 100,  // Виртуальные доллары (бонус за регистрацию)
+                premium: false
+            });
+        } else {
+            userCred = await signInWithEmailAndPassword(auth, email, pass);
+        }
+        loadDesktop();
+    } catch (err) {
+        playSystemSound('error');
+        errorMsg.innerText = "Ошибка: " + err.code;
+        console.error(err);
+    }
 });
 
 function loadDesktop() {
@@ -68,9 +83,10 @@ function loadDesktop() {
     playSystemSound('login');
 }
 
-// --- ОТРИСОВКА ИНТЕРФЕЙСА ---
+// --- ОТРИСОВКА ---
 function renderIcons() {
     const area = document.getElementById('icon-area');
+    area.innerHTML = ''; // Очистка перед рендером
     apps.forEach(app => {
         const el = document.createElement('div');
         el.className = 'desktop-icon';
@@ -82,6 +98,7 @@ function renderIcons() {
 
 function renderStartMenu() {
     const list = document.getElementById('start-list');
+    list.innerHTML = '';
     apps.forEach(app => {
         const item = document.createElement('div');
         item.className = 'menu-item';
@@ -94,7 +111,7 @@ function renderStartMenu() {
     });
 }
 
-// --- УПРАВЛЕНИЕ UI ---
+// --- UI ---
 document.getElementById('btn-start-menu').onclick = () => {
     const m = document.getElementById('start-menu');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
