@@ -81,4 +81,41 @@ textarea.notepad-area { flex: 1; border: none; resize: none; padding: 10px; outl
 .wallpaper-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .wallpaper-thumb { height: 60px; border-radius: 4px; background-size: cover; cursor: pointer; border: 2px solid transparent; }
 .wallpaper-thumb:hover { transform: scale(1.05); }
+
 .btn-action { padding: 5px 15px; background: #eee; border: 1px solid #ccc; cursor: pointer; border-radius: 3px; }
+
+/* Браузер 2.0 */
+.browser-content {
+    flex: 1;
+    background: white;
+    overflow-y: auto;
+    position: relative;
+    height: 100%;
+}
+.site-card {
+    padding: 20px;
+    border-radius: 10px;
+    width: 120px;
+    text-align: center;
+    transition: transform 0.2s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.site-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Обои в настройках */
+.wallpaper-thumb {
+    height: 80px; 
+    border-radius: 4px; 
+    background-size: cover; 
+    background-position: center;
+    cursor: pointer; 
+    border: 2px solid transparent; 
+}
+.wallpaper-thumb:hover { transform: scale(1.05); }
+
+/* CMD Input */
+.cmd-input {
+    width: 90%;
+}
