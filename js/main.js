@@ -1,17 +1,18 @@
-import { auth, db } from './config.js'; // Добавили db
+import { auth, db } from './config.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"; // Функции базы
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 import { playSystemSound } from './sound.js';
 import { apps } from './apps.js';
 import { openWindow } from './wm.js';
 
 // --- ИНИЦИАЛИЗАЦИЯ ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Исправил ссылку на обои по умолчанию на более надежную
+    // Обои
     const defaultWp = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop';
     const savedWp = localStorage.getItem('os_wallpaper') || defaultWp;
     document.getElementById('desktop').style.backgroundImage = `url('${savedWp}')`;
     
+    // Часы
     setInterval(() => {
         const d = new Date();
         document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -35,7 +36,7 @@ powerBtn.addEventListener('click', () => {
     }, 2000);
 });
 
-// --- АВТОРИЗАЦИЯ ---
+// --- АВТОРИЗАЦИЯ И СОЗДАНИЕ ДАННЫХ ---
 let isRegistering = false;
 const authBtn = document.getElementById('auth-btn');
 const toggleAuth = document.getElementById('toggle-auth');
@@ -48,6 +49,22 @@ toggleAuth.addEventListener('click', () => {
     toggleAuth.innerText = isRegistering ? "Уже есть аккаунт?" : "Нет аккаунта?";
 });
 
+// Функция создания данных пользователя (если их нет)
+async function ensureUserData(user, email) {
+    const userRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(userRef);
+
+    if (!docSnap.exists()) {
+        console.log("Данные отсутствуют. Создаем новый профиль...");
+        await setDoc(userRef, {
+            email: email,
+            UAH: 0,       // Гривны
+            money: 10,    // Доллары (УМЕНЬШИЛ БОНУС ДО 10)
+            premium: false
+        });
+    }
+}
+
 authBtn.addEventListener('click', async () => {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
@@ -57,18 +74,17 @@ authBtn.addEventListener('click', async () => {
     try {
         let userCred;
         if (isRegistering) {
-            // 1. Создаем пользователя
+            // 1. РЕГИСТРАЦИЯ
             userCred = await createUserWithEmailAndPassword(auth, email, pass);
-            // 2. Создаем ему кошелек в базе данных
-            await setDoc(doc(db, "users", userCred.user.uid), {
-                email: email,
-                UAH: 0,      // Реальные гривны (ты начисляешь)
-                money: 100,  // Виртуальные доллары (бонус за регистрацию)
-                premium: false
-            });
+            // Сразу создаем данные
+            await ensureUserData(userCred.user, email);
         } else {
+            // 2. ВХОД
             userCred = await signInWithEmailAndPassword(auth, email, pass);
+            // ПРОВЕРЯЕМ: Если аккаунт старый и данных нет -> создаем их сейчас
+            await ensureUserData(userCred.user, email);
         }
+        
         loadDesktop();
     } catch (err) {
         playSystemSound('error');
@@ -86,7 +102,7 @@ function loadDesktop() {
 // --- ОТРИСОВКА ---
 function renderIcons() {
     const area = document.getElementById('icon-area');
-    area.innerHTML = ''; // Очистка перед рендером
+    area.innerHTML = '';
     apps.forEach(app => {
         const el = document.createElement('div');
         el.className = 'desktop-icon';
